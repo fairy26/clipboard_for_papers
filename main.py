@@ -1,7 +1,8 @@
+import logging
 import sys
 import time
 
-from pyperclip import copy, waitForNewPaste, PyperclipTimeoutException
+from pyperclip import PyperclipTimeoutException, copy, waitForNewPaste
 
 
 def init_clipboard():
@@ -9,49 +10,47 @@ def init_clipboard():
     copy("")
 
 
+def update_clipboard(s: str):
+    """update clipboard by specified string"""
+    copy(s)
+
+
 def format(s: str) -> str:
     """extract \r and \n"""
     return s.replace("\r", "").strip().replace("\n", " ")
 
 
-def debug(string: str, before: bool = False, after: bool = False):
-    """print strings with prefix"""
-    if before:
-        print("--- FORMAT ---")
-        print(repr(string))
-    elif after:
-        print("  -  vvvv  -")
-        print(repr(string))
-        print("--------------\n")
-    else:
-        print(string)
-
-
-def run():
+def run(waiting_seconds: int = 60, sleep_seconds: int = 1):
     init_clipboard()
-    during = 60  # [s]
 
     while True:
         try:
-            string = waitForNewPaste(during)
+            logging.info("🤔 waiting for new copy to clipboard...")
+            text = waitForNewPaste(waiting_seconds)
         except PyperclipTimeoutException:
-            debug("exit")
+            logging.info("👋 timeout! bye~~")
             sys.exit(0)
         except KeyboardInterrupt:
-            debug("exit")
+            logging.info("👋 see ya!")
             sys.exit(0)
 
-        if string == "":
+        if text == "":
+            logging.info("🖼️ you might take a screenshot. skip it.\n")
             continue
 
-        debug(string, before=True)
-        string = format(string)
-        debug(string, after=True)
+        logging.info("🌀 BEFORE")
+        logging.info(f"{text}\n")
 
-        copy(string)
+        formatted_text = format(text)
 
-        time.sleep(1)
+        logging.info("✨ AFTER")
+        logging.info(f"{formatted_text}\n")
+
+        update_clipboard(formatted_text)
+
+        time.sleep(sleep_seconds)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format='%(message)s', level=logging.INFO)
     run()
