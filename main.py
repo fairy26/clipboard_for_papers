@@ -38,6 +38,10 @@ def run(waiting_seconds: int = 60, sleep_seconds: int = 1):
             logging.info("🖼️ you might take a screenshot. skip it.\n")
             continue
 
+        if "\r" not in text and "\n" not in text:
+            logging.info("🖊️ you copied a single line. skip it.\n")
+            continue
+
         logging.info("🌀 BEFORE")
         logging.info(f"{text}\n")
 
